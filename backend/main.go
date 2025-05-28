@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -22,8 +23,20 @@ type Contact struct {
 }
 
 func main() {
+	// Get environment variables
+	dbHost := os.Getenv("POSTGRES_HOST")
+	dbUser := os.Getenv("POSTGRES_USER")
+	dbPassword := os.Getenv("POSTGRES_PASSWORD")
+	dbName := os.Getenv("POSTGRES_DB")
+
+	// Validate environment variables
+	if dbHost == "" || dbUser == "" || dbPassword == "" || dbName == "" {
+		log.Fatal("Missing required environment variables")
+	}
+
 	// Connect to PostgreSQL
-	db, err := sqlx.Connect("postgres", "host=db port=5432 user=postgres password=postgres dbname=portfolio sslmode=disable")
+	connStr := "host=" + dbHost + " port=5432 user=" + dbUser + " password=" + dbPassword + " dbname=" + dbName + " sslmode=disable"
+	db, err := sqlx.Connect("postgres", connStr)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
